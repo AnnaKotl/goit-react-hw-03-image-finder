@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { Overlay, ModalContainer, ModalImage } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export const Modal = ({ image, onClose, onOpen }) => {
+export const Modal = ({ image, onClose }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.code === 'Escape') {
@@ -26,18 +26,13 @@ export const Modal = ({ image, onClose, onOpen }) => {
   };
 
   useEffect(() => {
-    if (onOpen) {
-      onOpen();
-    }
-
+    document.body.style.overflow = 'hidden';
     return () => {
-      if (onClose) {
-        onClose();
-      }
+      document.body.style.overflow = '';
     };
-  }, [onOpen, onClose]);
+  }, []);
 
-  return createPortal(
+  return ReactDOM.createPortal(
     <Overlay onClick={handleOverlayClick}>
       <ModalContainer>
         <ModalImage src={image.largeImageURL} alt={image.tags} />
