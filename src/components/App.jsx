@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { GlobalStyle } from './styles/GlobalStyle';
+import { GlobalStyle, StyledApp } from './styles/GlobalStyle';
 import { Layout } from './styles/Layout';
 import toast, { Toaster } from 'react-hot-toast';
 import { nanoid } from 'nanoid';
@@ -15,9 +15,10 @@ const toastOptions = {
   position: 'top-right',
   duration: 3000,
   style: {
-    border: '1px solid #713200',
-    padding: '10px',
+    border: 'none',
+    padding: '16px 20px',
     color: '#713200',
+    backgroundColor: '#f8f4ba',
     fontFamily: 'Ubuntu',
   },
 };
@@ -34,7 +35,9 @@ export class App extends Component {
     isLoading: false,
     showModal: false,
     selectedImage: null,
-    searchId: nanoid(), 
+    searchId: nanoid(),
+    shouldUpdateHeight: false,
+    searchError: null,
   };
 
   handleSearch = async (newQuery) => {
@@ -47,10 +50,15 @@ export class App extends Component {
         page: 1,
         isLoading: true,
         searchId: nanoid(),
+        searchError: null,
       });
 
       const images = await fetchImages(newQuery, 1);
       this.setState({ images, isLoading: false });
+      
+      if (images.length === 0) {
+        this.setState({ searchError: 'No results found.' });
+      }
     } catch (error) {
       toast.error(error.message, toastOptions);
     }
@@ -76,30 +84,34 @@ export class App extends Component {
   };
 
   render() {
-    const { images, isLoading, showModal, selectedImage, searchId } = this.state; // Додано searchId
+    const { images, isLoading, showModal, selectedImage, searchId, searchError } = this.state;
     const shouldRenderLoadMoreButton = images.length > 0 && !isLoading;
 
     return (
       <>
-        <GlobalStyle />
-        <Layout>
-          <Searchbar key={searchId} onSearch={this.handleSearch} />
-          <ImageGallery images={images} onItemClick={this.handleImageClick} />
-          {isLoading && <Loader />}
-          {shouldRenderLoadMoreButton && (
-            <Button
-              show={images.length >= 12}
-              onClick={this.handleLoadMore}
-            />
-          )}
-          {showModal && (
-            <Modal
-              image={selectedImage}
-              onClose={this.handleCloseModal}
-            />
-          )}
-          <Toaster position="top-right" />
-        </Layout>
+        <StyledApp>
+          <GlobalStyle />
+          <Layout>
+            <Searchbar key={searchId} onSearch={this.handleSearch} />
+            <ImageGallery images={images} onItemClick={this.handleImageClick} />
+            {isLoading && <Loader />}
+            {searchError && <p>{searchError}</p>}
+            {shouldRenderLoadMoreButton && images.length >= 12 && (
+              <Button
+                show={shouldRenderLoadMoreButton}
+                onClick={this.handleLoadMore}
+                onSearchButtonClick={this.handleSearch}
+              />
+            )}
+            {showModal && (
+              <Modal
+                image={selectedImage}
+                onClose={this.handleCloseModal}
+              />
+            )}
+            <Toaster position="top-right" />
+          </Layout>
+        </StyledApp>
       </>
     );
   }

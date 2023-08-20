@@ -29,14 +29,11 @@ export const SearchBarWrapper = styled.header`
   box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
 
   transition: 
-    transform 0.3s ease, 
-    width 0.3s ease,
-    padding 0.3s ease;
+    transform 0.3s ease;
 
   &:hover,
   &:active {
-    width: 500px;
-    padding: 18px 26px;
+    transform: scale(1.05);
   }
 `;
 

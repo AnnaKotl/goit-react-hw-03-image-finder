@@ -3,12 +3,29 @@ import styled from 'styled-components';
 
 const LoadMoreButton = styled.button`
   display: ${({ show }) => (show ? 'block' : 'none')};
-  margin: 20px auto;
-  padding: 10px 20px;
-  background-color: #007bff;
+
+  background-color: #fdfa63;
+  margin-top: 20px;
+  padding-bottom: 20px;
+  width: 308px;
+  height: 50px;
+
   border: none;
-  color: white;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  padding: 9px;
+  color: rgba(8, 43, 64, 0.9);
   cursor: pointer;
+  border-radius: 4px;
+  transition: 
+    transform 0.3s ease, 
+    background-color 0.5s ease, 
+    box-shadow 0.4s ease;
+
+  &:hover,
+  &:active {
+    background-color: #d0fb62;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+  
 `;
 
 export const Button = ({ show, onClick }) => (
