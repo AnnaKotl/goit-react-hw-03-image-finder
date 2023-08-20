@@ -30,6 +30,6 @@ const LoadMoreButton = styled.button`
 
 export const Button = ({ show, onClick }) => (
   <LoadMoreButton show={show} onClick={onClick}>
-    Load More
+    Load more
   </LoadMoreButton>
 );
