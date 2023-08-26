@@ -21,7 +21,7 @@ export const Searchbar = ({ onSearch }) => {
           type="text"
           autoComplete="off"
           autoFocus
-          placeholder="Search images"
+          placeholder="Search images or «lama»"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

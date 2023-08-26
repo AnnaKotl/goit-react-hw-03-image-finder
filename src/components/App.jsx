@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GlobalStyle, StyledApp } from './styles/GlobalStyle';
 import { Layout } from './styles/Layout';
 import toast, { Toaster } from 'react-hot-toast';
@@ -27,92 +27,78 @@ const searchSchema = Yup.object().shape({
   query: Yup.string().trim().required('Please enter a search term'),
 });
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: [],
-    page: 1,
-    isLoading: false,
-    showModal: false,
-    selectedImage: null,
-    searchId: nanoid(),
-    shouldUpdateHeight: false,
-    searchError: null,
-  };
+export const App = () => {
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [searchId, setSearchId] = useState(nanoid());
+  const [searchError, setSearchError] = useState(null);
 
-  handleSearch = async (newQuery) => {
-    try {
-      await searchSchema.validate({ query: newQuery });
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await searchSchema.validate({ query });
 
-      this.setState({
-        query: newQuery,
-        images: [],
-        page: 1,
-        isLoading: true,
-        searchId: nanoid(),
-        searchError: null,
-      });
+        setImages([]);
+        setPage(1);
+        setIsLoading(true);
+        setSearchId(nanoid());
+        setSearchError(null);
 
-      const images = await fetchImages(newQuery, 1);
-      this.setState({ images, isLoading: false });
-      
-      if (images.length === 0) {
-        this.setState({ searchError: 'No results found.' });
+        const fetchedImages = await fetchImages(query, 1);
+        setImages(fetchedImages);
+        setIsLoading(false);
+
+        if (fetchedImages.length === 0) {
+          setSearchError('No results found.');
+        }
+      } catch (error) {
+        toast.error(error.message, toastOptions);
       }
-    } catch (error) {
-      toast.error(error.message, toastOptions);
-    }
-  };
+    };
 
-  handleLoadMore = async () => {
-    const { query, page } = this.state;
+    fetchData();
+  }, [query]);
+
+  const handleLoadMore = async () => {
     const nextPage = page + 1;
     const newImages = await fetchImages(query, nextPage);
 
-    this.setState((prevState) => ({
-      images: [...prevState.images, ...newImages],
-      page: nextPage,
-    }));
+    setImages((prevImages) => [...prevImages, ...newImages]);
+    setPage(nextPage);
   };
 
-  handleImageClick = (image) => {
-    this.setState({ selectedImage: image, showModal: true });
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+    setShowModal(true);
   };
 
-  handleCloseModal = () => {
-    this.setState({ showModal: false, selectedImage: null });
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedImage(null);
   };
 
-  render() {
-    const { images, isLoading, showModal, selectedImage, searchId, searchError } = this.state;
-    const shouldRenderLoadMoreButton = images.length > 0 && !isLoading;
+  const shouldRenderLoadMoreButton = images.length > 0 && !isLoading;
 
-    return (
-      <>
-        <StyledApp>
-          <GlobalStyle />
-          <Layout>
-            <Searchbar key={searchId} onSearch={this.handleSearch} />
-            <ImageGallery images={images} onItemClick={this.handleImageClick} />
-            {isLoading && <Loader />}
-            {searchError && <p>{searchError}</p>}
-            {shouldRenderLoadMoreButton && images.length >= 12 && (
-              <Button
-                show={shouldRenderLoadMoreButton}
-                onClick={this.handleLoadMore}
-                onSearchButtonClick={this.handleSearch}
-              />
-            )}
-            {showModal && (
-              <Modal
-                image={selectedImage}
-                onClose={this.handleCloseModal}
-              />
-            )}
-            <Toaster position="top-right" />
-          </Layout>
-        </StyledApp>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <StyledApp>
+        <GlobalStyle />
+        <Layout>
+          <Searchbar key={searchId} onSearch={setQuery} />
+          <ImageGallery images={images} onItemClick={handleImageClick} />
+          {isLoading && <Loader />}
+          {searchError && <p>{searchError}</p>}
+          {shouldRenderLoadMoreButton && images.length >= 12 && (
+            <Button show={shouldRenderLoadMoreButton} onClick={handleLoadMore} />
+          )}
+          {showModal && <Modal image={selectedImage} onClose={handleCloseModal} />}
+          <Toaster position="top-right" />
+        </Layout>
+      </StyledApp>
+    </>
+  );
+};
